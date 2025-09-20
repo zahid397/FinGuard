@@ -1,5 +1,5 @@
 streamlit
 pandas
-matplotlib
+matplotlib==3.7.1
 openai
 python-dotenv
