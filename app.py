@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")   # Safe backend for Streamlit
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="FinGuard", page_icon="💰")
-
 # Title
-st.title("💰 FinGuard – AI-powered Finance Tracker")
+st.title("💰 FinGuard - Smart Expense Tracker")
 
 # Intro
 st.write("Welcome to **FinGuard** – your smart expense tracker with AI-powered saving tips!")
@@ -24,9 +24,9 @@ st.table(df)
 # Show chart
 fig, ax = plt.subplots()
 ax.pie(df["Amount"], labels=df["Category"], autopct="%1.1f%%", startangle=90)
-ax.axis("equal")
+ax.axis("equal")  # Equal aspect ratio ensures the pie chart is circular
 st.pyplot(fig)
 
-# AI saving tip (static demo)
-st.subheader("🤖 Smart Saving Tip")
-st.success("Try to reduce Shopping expenses by 10% this month to save more!")
+# AI Saving Tip (Static demo tip)
+st.subheader("💡 Smart Saving Tip")
+st.write("Try reducing your shopping expenses by 20% this month to increase your savings!")
