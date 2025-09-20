@@ -1,0 +1,46 @@
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# App config
+st.set_page_config(page_title="FinGuard - AI Finance Assistant")
+st.title("🛡️ FinGuard - AI Finance Helper")
+st.write("Welcome Zahid! 🚀 This is your AI partner to track expenses and get saving tips 💰")
+
+# Temporary storage
+if 'expenses' not in st.session_state:
+    st.session_state.expenses = []
+
+# Inputs
+expense = st.number_input("Enter expense amount:", min_value=0)
+category = st.text_input("Enter category (e.g. food, travel):")
+
+# Add expense button
+if st.button("Add Expense"):
+    st.session_state.expenses.append({'amount': expense, 'category': category})
+    st.success(f"✅ Saved expense {expense} in category: {category}")
+
+# Show summary + pie chart
+if st.button("Show Summary"):
+    if st.session_state.expenses:
+        total = sum(item['amount'] for item in st.session_state.expenses)
+        st.info(f"📊 Total Expenses: {total} BDT")
+
+        # Convert to DataFrame
+        df = pd.DataFrame(st.session_state.expenses)
+
+        # Show list
+        st.write(df)
+
+        # Pie chart
+        fig, ax = plt.subplots()
+        df.groupby("category")["amount"].sum().plot(kind="pie", autopct="%1.1f%%", ax=ax)
+        ax.set_ylabel("")  # hide y label
+        ax.set_title("Expense Breakdown by Category")
+        st.pyplot(fig)
+
+    else:
+        st.warning("No expenses added yet!")
+
+# Footer
+st.caption("Built by Team Zahid Hasan 🤝 with AI Partner (ChatGPT)")
