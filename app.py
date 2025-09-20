@@ -1,8 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib
-matplotlib.use("Agg")   # Safe backend for Streamlit
-import matplotlib.pyplot as plt
 
 # Title
 st.title("💰 FinGuard - Smart Expense Tracker")
@@ -21,11 +18,9 @@ df = pd.DataFrame(data)
 st.subheader("📊 Expense Summary")
 st.table(df)
 
-# Show chart
-fig, ax = plt.subplots()
-ax.pie(df["Amount"], labels=df["Category"], autopct="%1.1f%%", startangle=90)
-ax.axis("equal")  # Equal aspect ratio ensures the pie chart is circular
-st.pyplot(fig)
+# Show bar chart
+st.subheader("📈 Expense Distribution")
+st.bar_chart(df.set_index("Category"))
 
 # AI Saving Tip (Static demo tip)
 st.subheader("💡 Smart Saving Tip")
