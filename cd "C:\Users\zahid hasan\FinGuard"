@@ -1,8 +1,0 @@
-bash
-(
-echo streamlit
-echo pandas
-echo matplotlib
-echo openai
-echo python-dotenv
-) > requirements.txt
