@@ -28,3 +28,7 @@ python app.py
 ![FinGuard Screenshot](https://drive.google.com/uc?export=view&id=119FmFw6WIfxxxx)
 
 [▶️ Watch Full Demo Video](https://drive.google.com/file/d/17XQ1I1xxxx/view?usp=sharing)
+
+## 👨‍💻 Author
+Zahid Hasan  
+[GitHub Profile](https://github.com/zahid397)
