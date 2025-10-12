@@ -1,0 +1,32 @@
+[
+    {
+        "Date": "2025-10-01",
+        "Category": "Food",
+        "Description": "Lunch with friends",
+        "Amount": 250.00
+    },
+    {
+        "Date": "2025-10-03",
+        "Category": "Transport",
+        "Description": "Bus fare",
+        "Amount": 40.00
+    },
+    {
+        "Date": "2025-10-05",
+        "Category": "Rent",
+        "Description": "Monthly house rent",
+        "Amount": 25000.00
+    },
+    {
+        "Date": "2025-10-07",
+        "Category": "Utilities",
+        "Description": "Electricity bill",
+        "Amount": 1200.00
+    },
+    {
+        "Date": "2025-10-10",
+        "Category": "Shopping",
+        "Description": "New T-shirt",
+        "Amount": 850.00
+    }
+]
