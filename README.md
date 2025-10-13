@@ -36,3 +36,4 @@ FinGuard একটি AI-চালিত স্মার্ট ব্যয় �
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
+live demo https://anti-corruption-prototype-wwvjvkt492vmcryeo3b2ad.streamlit.app/
