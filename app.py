@@ -65,12 +65,12 @@ def save_data(df):
 def load_budget():
     if os.path.exists(BUDGET_FILE):
         with open(BUDGET_FILE, "r") as f:
-            return json.load(f).get("monthly_budget", 0.0)
+            return float(json.load(f).get("monthly_budget", 0.0))
     return 0.0
 
 def save_budget(budget):
     with open(BUDGET_FILE, "w") as f:
-        json.dump({"monthly_budget": budget}, f, indent=4)
+        json.dump({"monthly_budget": float(budget)}, f, indent=4)
 
 # ============================
 # 🤖 GEMINI AI SETUP
@@ -124,20 +124,25 @@ tab1, tab2, tab3, tab4 = st.tabs(["📊 ড্যাশবোর্ড", "➕ �
 # ============================
 with tab1:
     st.subheader("📈 ব্যয়ের বিশ্লেষণ")
+
     if not df.empty:
         total = df["Amount"].sum()
         st.metric("💰 মোট খরচ", f"₹{total:,.2f}")
 
-        start_of_month = pd.Timestamp(datetime.date.today().replace(day=1))
-        monthly = df[df["Date"] >= start_of_month]
-        st.metric("💳 এই মাসের খরচ", f"₹{monthly['Amount'].sum():,.2f}")
+        # ✅ FIX: proper datetime comparison
+        today = pd.Timestamp(datetime.date.today())
+        start_of_month = today.replace(day=1)
 
+        df["Date"] = pd.to_datetime(df["Date"])
+        monthly = df[df["Date"] >= start_of_month]
+
+        st.metric("💳 এই মাসের খরচ", f"₹{monthly['Amount'].sum():,.2f}")
         st.bar_chart(df.groupby("Category")["Amount"].sum())
     else:
         st.info("খরচ যোগ করুন, তাহলে বিশ্লেষণ দেখা যাবে।")
 
     st.markdown("---")
-    # ✅ FIXED BUDGET INPUT TYPE ISSUE
+    # ✅ FIXED numeric type
     current_value = float(st.session_state["monthly_budget"])
     budget = st.number_input("🎯 মাসিক বাজেট (₹)", value=current_value, step=500.0, format="%.2f")
     if st.button("বাজেট সেভ করুন"):
@@ -156,6 +161,7 @@ with tab2:
         desc = st.text_input("বিবরণ")
         amt = st.number_input("পরিমাণ (₹)", min_value=0.0, step=10.0)
         submitted = st.form_submit_button("✅ খরচ যোগ করুন")
+
         if submitted and amt > 0:
             new = pd.DataFrame([[date, cat, desc, amt]], columns=["Date", "Category", "Description", "Amount"])
             new["Date"] = pd.to_datetime(new["Date"])
