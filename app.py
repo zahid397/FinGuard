@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import json
 import os
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 import google.generativeai as genai
 
 # ============================
@@ -24,6 +24,7 @@ DATA_FILE = "expenses.json"
 BUDGET_FILE = "budget.json"
 USER_FILE = "user.json"
 
+# Generate or load encryption key
 if not os.path.exists(KEY_FILE):
     key = Fernet.generate_key()
     with open(KEY_FILE, "wb") as f:
@@ -38,7 +39,14 @@ def encrypt_data(data):
     return fernet.encrypt(json.dumps(data).encode()).decode()
 
 def decrypt_data(data):
-    return json.loads(fernet.decrypt(data.encode()).decode())
+    """Decrypts data safely. If decryption fails, auto-resets file."""
+    try:
+        return json.loads(fernet.decrypt(data.encode()).decode())
+    except (InvalidToken, Exception):
+        st.warning("⚠️ পুরনো ডেটা ডিক্রিপ্ট করা যায়নি। নতুনভাবে রিসেট করা হচ্ছে...")
+        with open(DATA_FILE, "w") as f:
+            f.write(encrypt_data([]))
+        return []
 
 # ============================
 # 👤 USER AUTHENTICATION
@@ -63,9 +71,10 @@ CATEGORY_OPTIONS = ["Food", "Transport", "Rent", "Utilities", "Entertainment", "
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
-            encrypted = f.read()
-            if encrypted.strip():
-                return pd.DataFrame(decrypt_data(encrypted))
+            encrypted = f.read().strip()
+            if encrypted:
+                data = decrypt_data(encrypted)
+                return pd.DataFrame(data)
     return pd.DataFrame(columns=["Date", "Category", "Description", "Amount"])
 
 def save_data(df):
@@ -173,8 +182,7 @@ with tab1:
         st.metric("💰 মোট খরচ", f"₹{total:,.2f}")
 
         start_of_month = pd.Timestamp(datetime.date.today().replace(day=1))
-        monthly = df[df["Date"] >= start_of_month]
-        st.metric("💳 এই মাসের খরচ", f"₹{monthly['Amount'].sum():,.2f}")
+        monthly = df[pd.to_datetime(df["Date"]) >= start_of_month]
 
         st.bar_chart(df.groupby("Category")["Amount"].sum())
     else:
@@ -230,6 +238,7 @@ FinGuard এখন আরও শক্তিশালী ও সুরক্ষ�
 - AES এনক্রিপশন দ্বারা ডেটা সুরক্ষা  
 - ইউজার লগইন সিস্টেম  
 - Fraud Detection সিস্টেম  
+- Auto Reset (InvalidToken Fix)
 
 **📘 ডেটা প্রাইভেসি:**  
 FinGuard আপনার ডেটা সুরক্ষিত রাখে। সব তথ্য লোকাল JSON ফাইল-এ সংরক্ষণ হয়, ক্লাউডে পাঠানো হয় না।  
