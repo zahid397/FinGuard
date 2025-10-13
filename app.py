@@ -15,7 +15,18 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
+# ✅ Force Light Theme
+st.markdown("""
+    <style>
+        :root {
+            color-scheme: light;
+        }
+        [data-testid="stAppViewContainer"] {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 # ============================
 # 🔐 AES ENCRYPTION SETUP
 # ============================
