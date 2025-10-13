@@ -3,10 +3,11 @@ import pandas as pd
 import datetime
 import json
 import os
+from cryptography.fernet import Fernet
 import google.generativeai as genai
 
 # ============================
-# 🚀 PAGE CONFIG
+# 🚀 CONFIGURATION
 # ============================
 st.set_page_config(
     page_title="FinGuard — AI Smart Expense & Budget Companion",
@@ -16,54 +17,62 @@ st.set_page_config(
 )
 
 # ============================
-# 🎨 CUSTOM STYLING
+# 🔐 AES ENCRYPTION SETUP
 # ============================
-st.markdown("""
-<style>
-.main-header {
-    font-size: 2.5em;
-    font-weight: bold;
-    color: #0d47a1;
-}
-.logo-text {
-    color: #f44336;
-    font-style: italic;
-}
-.tagline {
-    color: #42a5f5;
-    font-style: italic;
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown('<div class="main-header">💰 Fin<span class="logo-text">Guard</span></div>', unsafe_allow_html=True)
-st.markdown('<p class="tagline">— AI Smart Expense & Budget Companion</p>', unsafe_allow_html=True)
-
-# ============================
-# 📂 FILES
-# ============================
+KEY_FILE = "secret.key"
 DATA_FILE = "expenses.json"
 BUDGET_FILE = "budget.json"
+USER_FILE = "user.json"
 
+if not os.path.exists(KEY_FILE):
+    key = Fernet.generate_key()
+    with open(KEY_FILE, "wb") as f:
+        f.write(key)
+else:
+    with open(KEY_FILE, "rb") as f:
+        key = f.read()
+
+fernet = Fernet(key)
+
+def encrypt_data(data):
+    return fernet.encrypt(json.dumps(data).encode()).decode()
+
+def decrypt_data(data):
+    return json.loads(fernet.decrypt(data.encode()).decode())
+
+# ============================
+# 👤 USER AUTHENTICATION
+# ============================
+def register_user(username, password):
+    user_data = {"username": username, "password": password}
+    with open(USER_FILE, "w") as f:
+        json.dump(user_data, f)
+
+def verify_user(username, password):
+    if os.path.exists(USER_FILE):
+        with open(USER_FILE, "r") as f:
+            user = json.load(f)
+        return user["username"] == username and user["password"] == password
+    return False
+
+# ============================
+# 📦 DATA MANAGEMENT
+# ============================
 CATEGORY_OPTIONS = ["Food", "Transport", "Rent", "Utilities", "Entertainment", "Shopping", "Education", "Health", "Others"]
 
-# ============================
-# 💾 DATA FUNCTIONS
-# ============================
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
-            data = json.load(f)
-        df = pd.DataFrame(data)
-        if not df.empty:
-            df["Date"] = pd.to_datetime(df["Date"])
-        return df
+            encrypted = f.read()
+            if encrypted.strip():
+                return pd.DataFrame(decrypt_data(encrypted))
     return pd.DataFrame(columns=["Date", "Category", "Description", "Amount"])
 
 def save_data(df):
     df["Date"] = df["Date"].astype(str)
+    encrypted = encrypt_data(df.to_dict("records"))
     with open(DATA_FILE, "w") as f:
-        json.dump(df.to_dict("records"), f, indent=4)
+        f.write(encrypted)
 
 def load_budget():
     if os.path.exists(BUDGET_FILE):
@@ -76,14 +85,12 @@ def save_budget(budget):
         json.dump({"monthly_budget": budget}, f, indent=4)
 
 # ============================
-# 🕵️‍♂️ SCAM DETECTION
+# 🚨 FRAUD DETECTION SYSTEM
 # ============================
-def detect_scam(text):
-    suspicious_keywords = ["lottery", "reward", "urgent", "OTP", "click here", "send money", "free gift", "offer"]
-    for word in suspicious_keywords:
-        if word.lower() in text.lower():
-            return True
-    return False
+def detect_fraud(description):
+    suspicious_words = ["lottery", "reward", "gift", "refund", "offer", "otp", "prize"]
+    desc_lower = description.lower()
+    return any(word in desc_lower for word in suspicious_words)
 
 # ============================
 # 🤖 GEMINI AI SETUP
@@ -119,6 +126,8 @@ Respond in short, clear Bengali sentences.
 # ============================
 # 🧠 SESSION STATE
 # ============================
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
 if "expense_df" not in st.session_state:
     st.session_state["expense_df"] = load_data()
 if "monthly_budget" not in st.session_state:
@@ -128,9 +137,31 @@ df = st.session_state["expense_df"]
 model = setup_gemini()
 
 # ============================
+# 👤 LOGIN SCREEN
+# ============================
+if not st.session_state["logged_in"]:
+    st.title("🔐 FinGuard Secure Login")
+    option = st.radio("Select an option:", ["Login", "Register"])
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if option == "Register" and st.button("Create Account"):
+        register_user(username, password)
+        st.success("✅ Account created successfully!")
+
+    if option == "Login" and st.button("Login"):
+        if verify_user(username, password):
+            st.session_state["logged_in"] = True
+            st.success("✅ Login successful!")
+            st.experimental_rerun()
+        else:
+            st.error("❌ Invalid username or password.")
+    st.stop()
+
+# ============================
 # 🧭 TABS
 # ============================
-tab1, tab2, tab3, tab4 = st.tabs(["📊 ড্যাশবোর্ড", "➕ খরচ যোগ করুন", "🤖 AI সহায়ক", "🔒 সিকিউরিটি ও অ্যাবাউট"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 ড্যাশবোর্ড", "➕ খরচ যোগ করুন", "🤖 AI সহায়ক", "ℹ️ সম্পর্কে"])
 
 # ============================
 # TAB 1 — DASHBOARD
@@ -145,14 +176,7 @@ with tab1:
         monthly = df[df["Date"] >= start_of_month]
         st.metric("💳 এই মাসের খরচ", f"₹{monthly['Amount'].sum():,.2f}")
 
-        # 📊 Graphs
-        st.subheader("📊 ক্যাটাগরি অনুযায়ী খরচ")
         st.bar_chart(df.groupby("Category")["Amount"].sum())
-
-        st.subheader("📅 সময়ের সাথে খরচের প্রবণতা")
-        df_sorted = df.sort_values(by="Date")
-        df_sorted["Cumulative"] = df_sorted["Amount"].cumsum()
-        st.line_chart(df_sorted.set_index("Date")["Cumulative"])
     else:
         st.info("খরচ যোগ করুন, তাহলে বিশ্লেষণ দেখা যাবে।")
 
@@ -176,14 +200,14 @@ with tab2:
         amt = st.number_input("পরিমাণ (₹)", min_value=0.0, step=10.0)
         submitted = st.form_submit_button("✅ খরচ যোগ করুন")
         if submitted and amt > 0:
-            if detect_scam(desc):
-                st.warning("⚠️ এই বিবরণটি সন্দেহজনক হতে পারে! অনুগ্রহ করে যাচাই করুন।")
+            if detect_fraud(desc):
+                st.warning("🚨 সতর্কতা: এই খরচে সন্দেহজনক শব্দ পাওয়া গেছে!")
             new = pd.DataFrame([[date, cat, desc, amt]], columns=["Date", "Category", "Description", "Amount"])
             new["Date"] = pd.to_datetime(new["Date"])
             df = pd.concat([df, new], ignore_index=True)
             save_data(df)
             st.session_state["expense_df"] = df
-            st.success("✅ খরচ যোগ করা হয়েছে!")
+            st.success("খরচ যোগ করা হয়েছে!")
 
 # ============================
 # TAB 3 — AI ASSISTANT
@@ -195,25 +219,22 @@ with tab3:
         st.markdown(ask_ai(model, q, df))
 
 # ============================
-# TAB 4 — SECURITY & ABOUT
+# TAB 4 — ABOUT
 # ============================
 with tab4:
     st.markdown("""
-### 🔒 Data Privacy & Security
-FinGuard আপনার ডেটা সুরক্ষিত রাখে। সব তথ্য **লোকাল JSON ফাইল**-এ সংরক্ষণ হয়, ক্লাউডে পাঠানো হয় না।  
-ভবিষ্যৎ ভার্সনে **AES Encryption** এবং **User Login System** যুক্ত করা হবে।  
+### ℹ️ FinGuard - Advanced Secure Edition
+FinGuard এখন আরও শক্তিশালী ও সুরক্ষিত।
 
-### ℹ️ FinGuard - ICT Award Build (Enhanced)
-FinGuard একটি AI-চালিত বাজেট ও খরচ বিশ্লেষণ অ্যাপ।  
-এটি আপনার ব্যয় বিশ্লেষণ, বাজেট মনিটরিং এবং AI টিপসের মাধ্যমে আর্থিক সচেতনতা বাড়ায়।
+**🔐 নতুন ফিচারসমূহ:**
+- AES এনক্রিপশন দ্বারা ডেটা সুরক্ষা  
+- ইউজার লগইন সিস্টেম  
+- Fraud Detection সিস্টেম  
 
-**মূল ফিচারসমূহ:**
-- 🧠 AI Analysis (Gemini 2.5 Flash)  
-- ⚠️ Fraud Detection System (Beta)  
-- 📈 Data Visualization Charts  
-- 🔐 Local Secure Data Handling  
+**📘 ডেটা প্রাইভেসি:**  
+FinGuard আপনার ডেটা সুরক্ষিত রাখে। সব তথ্য লোকাল JSON ফাইল-এ সংরক্ষণ হয়, ক্লাউডে পাঠানো হয় না।  
+ভবিষ্যৎ ভার্সনে উন্নত AI অ্যানালিটিক্স ও ব্যাংক-লেভেল এনক্রিপশন যুক্ত করা হবে।
 
-👨‍💻 তৈরি করেছেন: Zahid Hasan  
-🏆 ICT Innovation Award 2025 Submission  
-📧 Contact: zh05698@gmail.com  
+👨‍💻 তৈরি করেছেন: **Zahid Hasan**  
+🏆 ICT Innovation Award 2025 Submission
 """)
