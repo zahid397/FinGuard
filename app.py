@@ -27,6 +27,20 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+# ✅ Fix for faded tab text & icons
+st.markdown("""
+    <style>
+        /* Tabs text & icon color */
+        .stTabs [data-baseweb="tab"] p {
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }
+        /* Selected tab underline */
+        .stTabs [aria-selected="true"] {
+            border-bottom: 3px solid #e50914 !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 # ============================
 # 🔐 AES ENCRYPTION SETUP
 # ============================
