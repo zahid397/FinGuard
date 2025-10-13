@@ -4,16 +4,15 @@
 
 ---
 
-## 🔗 Live Demo  
-👉 [Click here to open FinGuard App](https://finguard-akgb9wdbsdjksbsekeslgc.streamlit.app/)
-
+👉 🌐 Live Demo: https://finguard-lvkl7sfqcg8uo6j8kpuxep.streamlit.app/
+🔐 Features: AES Encryption, Login System, Fraud Detection, Gemini AI Assistant
 ---
 
 ## 🧠 About the Project
 
 FinGuard তৈরি করা হয়েছে ছাত্র, উদ্যোক্তা এবং পেশাজীবীদের জন্য, যাতে তারা সহজে তাদের দৈনন্দিন খরচ পরিচালনা করতে পারে এবং AI থেকে সাশ্রয়ের পরামর্শ পেতে পারে।
 
-### ✨ Key Features
+### ✨ Key Featu
 
 - 📊 **Expense Dashboard** — প্রতিটি ক্যাটাগরির খরচের সারাংশ ও চার্ট  
 - 🎯 **Budget Tracker** — মাসিক বাজেট সেট করা ও অগ্রগতি মনিটর  
@@ -55,3 +54,5 @@ Visualization: Matplotlib, Streamlit Charts
 
 Language: Python (100%)
 
+🌐 Live Demo: https://finguard-lvkl7sfqcg8uo6j8kpuxep.streamlit.app/
+🔐 Features: AES Encryption, Login System, Fraud Detection, Gemini AI Assistant
