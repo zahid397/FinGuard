@@ -47,6 +47,9 @@ BUDGET_FILE = "budget.json"
 
 CATEGORY_OPTIONS = ["Food", "Transport", "Rent", "Utilities", "Entertainment", "Shopping", "Education", "Health", "Others"]
 
+# ============================
+# 💾 DATA FUNCTIONS
+# ============================
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
@@ -65,12 +68,22 @@ def save_data(df):
 def load_budget():
     if os.path.exists(BUDGET_FILE):
         with open(BUDGET_FILE, "r") as f:
-            return float(json.load(f).get("monthly_budget", 0.0))
+            return json.load(f).get("monthly_budget", 0.0)
     return 0.0
 
 def save_budget(budget):
     with open(BUDGET_FILE, "w") as f:
-        json.dump({"monthly_budget": float(budget)}, f, indent=4)
+        json.dump({"monthly_budget": budget}, f, indent=4)
+
+# ============================
+# 🕵️‍♂️ SCAM DETECTION
+# ============================
+def detect_scam(text):
+    suspicious_keywords = ["lottery", "reward", "urgent", "OTP", "click here", "send money", "free gift", "offer"]
+    for word in suspicious_keywords:
+        if word.lower() in text.lower():
+            return True
+    return False
 
 # ============================
 # 🤖 GEMINI AI SETUP
@@ -117,32 +130,33 @@ model = setup_gemini()
 # ============================
 # 🧭 TABS
 # ============================
-tab1, tab2, tab3, tab4 = st.tabs(["📊 ড্যাশবোর্ড", "➕ খরচ যোগ করুন", "🤖 AI সহায়ক", "ℹ️ সম্পর্কে"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 ড্যাশবোর্ড", "➕ খরচ যোগ করুন", "🤖 AI সহায়ক", "🔒 সিকিউরিটি ও অ্যাবাউট"])
 
 # ============================
 # TAB 1 — DASHBOARD
 # ============================
 with tab1:
     st.subheader("📈 ব্যয়ের বিশ্লেষণ")
-
     if not df.empty:
         total = df["Amount"].sum()
         st.metric("💰 মোট খরচ", f"₹{total:,.2f}")
 
-        # ✅ FIX: proper datetime comparison
-        today = pd.Timestamp(datetime.date.today())
-        start_of_month = today.replace(day=1)
-
-        df["Date"] = pd.to_datetime(df["Date"])
+        start_of_month = pd.Timestamp(datetime.date.today().replace(day=1))
         monthly = df[df["Date"] >= start_of_month]
-
         st.metric("💳 এই মাসের খরচ", f"₹{monthly['Amount'].sum():,.2f}")
+
+        # 📊 Graphs
+        st.subheader("📊 ক্যাটাগরি অনুযায়ী খরচ")
         st.bar_chart(df.groupby("Category")["Amount"].sum())
+
+        st.subheader("📅 সময়ের সাথে খরচের প্রবণতা")
+        df_sorted = df.sort_values(by="Date")
+        df_sorted["Cumulative"] = df_sorted["Amount"].cumsum()
+        st.line_chart(df_sorted.set_index("Date")["Cumulative"])
     else:
         st.info("খরচ যোগ করুন, তাহলে বিশ্লেষণ দেখা যাবে।")
 
     st.markdown("---")
-    # ✅ FIXED numeric type
     current_value = float(st.session_state["monthly_budget"])
     budget = st.number_input("🎯 মাসিক বাজেট (₹)", value=current_value, step=500.0, format="%.2f")
     if st.button("বাজেট সেভ করুন"):
@@ -161,14 +175,15 @@ with tab2:
         desc = st.text_input("বিবরণ")
         amt = st.number_input("পরিমাণ (₹)", min_value=0.0, step=10.0)
         submitted = st.form_submit_button("✅ খরচ যোগ করুন")
-
         if submitted and amt > 0:
+            if detect_scam(desc):
+                st.warning("⚠️ এই বিবরণটি সন্দেহজনক হতে পারে! অনুগ্রহ করে যাচাই করুন।")
             new = pd.DataFrame([[date, cat, desc, amt]], columns=["Date", "Category", "Description", "Amount"])
             new["Date"] = pd.to_datetime(new["Date"])
             df = pd.concat([df, new], ignore_index=True)
             save_data(df)
             st.session_state["expense_df"] = df
-            st.success("খরচ যোগ করা হয়েছে!")
+            st.success("✅ খরচ যোগ করা হয়েছে!")
 
 # ============================
 # TAB 3 — AI ASSISTANT
@@ -180,20 +195,25 @@ with tab3:
         st.markdown(ask_ai(model, q, df))
 
 # ============================
-# TAB 4 — ABOUT
+# TAB 4 — SECURITY & ABOUT
 # ============================
 with tab4:
     st.markdown("""
-### ℹ️ FinGuard - ICT Award Build
-FinGuard একটি AI-চালিত বাজেট ট্র্যাকিং অ্যাপ।
-এটি ব্যবহারকারীদের ব্যয় বিশ্লেষণ, বাজেট মনিটরিং এবং AI ভিত্তিক টিপস দেয়।
+### 🔒 Data Privacy & Security
+FinGuard আপনার ডেটা সুরক্ষিত রাখে। সব তথ্য **লোকাল JSON ফাইল**-এ সংরক্ষণ হয়, ক্লাউডে পাঠানো হয় না।  
+ভবিষ্যৎ ভার্সনে **AES Encryption** এবং **User Login System** যুক্ত করা হবে।  
+
+### ℹ️ FinGuard - ICT Award Build (Enhanced)
+FinGuard একটি AI-চালিত বাজেট ও খরচ বিশ্লেষণ অ্যাপ।  
+এটি আপনার ব্যয় বিশ্লেষণ, বাজেট মনিটরিং এবং AI টিপসের মাধ্যমে আর্থিক সচেতনতা বাড়ায়।
 
 **মূল ফিচারসমূহ:**
-- 💰 Expense Dashboard  
-- 📊 Budget Tracker  
-- 🤖 Gemini 2.5 Flash Assistant  
-- 🧠 বাংলা AI বিশ্লেষণ  
+- 🧠 AI Analysis (Gemini 2.5 Flash)  
+- ⚠️ Fraud Detection System (Beta)  
+- 📈 Data Visualization Charts  
+- 🔐 Local Secure Data Handling  
 
-👨‍💻 **তৈরি করেছেন:** Zahid Hasan  
-🏆 ICT Innovation Award 2025 Submission
+👨‍💻 তৈরি করেছেন: Zahid Hasan  
+🏆 ICT Innovation Award 2025 Submission  
+📧 Contact: zh05698@gmail.com  
 """)
