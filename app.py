@@ -41,6 +41,79 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+# 🎨 Premium Polish
+st.markdown("""
+    <style>
+        /* Card look for inputs and buttons */
+        div[data-testid="stNumberInput"], div[data-testid="stTextInput"], div[data-testid="stSelectbox"], textarea {
+            border-radius: 10px !important;
+            border: 1px solid #ddd !important;
+            background-color: #f9f9f9 !important;
+            color: #000 !important;
+        }
+        button[kind="secondary"], button[kind="primary"] {
+            background-color: #0d47a1 !important;
+            color: white !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            padding: 8px 20px !important;
+        }
+        button[kind="primary"]:hover {
+            background-color: #1565c0 !important;
+        }
+        /* Metric card polish */
+        div[data-testid="stMetricValue"] {
+            color: #0d47a1 !important;
+            font-weight: bold !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+# 🌈 FinGuard Premium Glow Theme
+st.markdown("""
+<style>
+    /* Gradient header + title glow */
+    h1, h2, h3 {
+        background: linear-gradient(90deg, #004aad, #0099ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    /* App header section */
+    .stAppHeader {
+        background: linear-gradient(90deg, #004aad, #00b4d8);
+        color: white !important;
+        font-weight: bold;
+        text-shadow: 0px 0px 8px rgba(255,255,255,0.5);
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Tabs hover glow */
+    .stTabs [data-baseweb="tab"]:hover p {
+        color: #004aad !important;
+        text-shadow: 0px 0px 6px rgba(0, 74, 173, 0.4);
+    }
+
+    /* Button glow effect */
+    button[kind="primary"] {
+        box-shadow: 0px 0px 10px rgba(0, 74, 173, 0.4);
+        transition: 0.3s ease;
+    }
+    button[kind="primary"]:hover {
+        transform: scale(1.03);
+        box-shadow: 0px 0px 14px rgba(0, 74, 173, 0.7);
+    }
+
+    /* Card soft shadow */
+    div[data-testid="stNumberInput"], div[data-testid="stTextInput"], div[data-testid="stSelectbox"], textarea {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ============================
 # 🔐 AES ENCRYPTION SETUP
 # ============================
