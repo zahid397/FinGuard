@@ -9,6 +9,12 @@ import google.generativeai as genai
 # ============================
 # 🚀 CONFIGURATION
 # ============================
+st.set_page_config(
+    page_title="FinGuard — AI Smart Expense & Budget Companion",
+    page_icon="💰",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 st.rerun()
     page_title="FinGuard — AI Smart Expense & Budget Companion",
     page_icon="💰",
