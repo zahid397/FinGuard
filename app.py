@@ -52,8 +52,7 @@ def encrypt_data(data):
 def decrypt_data(token):
     try:
         return json.loads(fernet.decrypt(token.encode()).decode())
-    except Exception as e:
-        # on error, return empty list
+    except Exception:
         return []
 
 def load_data(file, cols):
@@ -74,7 +73,7 @@ def save_data(file, df):
     with open(file, "w") as f:
         f.write(token)
 
-# ========== SESSION STATE LOADING ==========
+# ========== SESSION STATE ==========
 if "expenses" not in st.session_state:
     st.session_state.expenses = load_data(DATA_FILE, ["Date","Category","Description","Amount"])
 if "bank" not in st.session_state:
@@ -82,7 +81,7 @@ if "bank" not in st.session_state:
 if "budget" not in st.session_state:
     st.session_state.budget = load_data(BUDGET_FILE, ["Date","Daily","Monthly"])
 
-# ========== AI / Gemini SETUP ==========
+# ========== GEMINI AI ==========
 @st.cache_resource
 def setup_gemini():
     key = st.secrets.get("GEMINI_API_KEY")
@@ -96,33 +95,30 @@ model = setup_gemini()
 def ai_reply(df, q):
     if df.empty:
         return "⚠️ Please add some data first!"
-    # sum total
     df2 = df.copy()
     df2["Amount"] = pd.to_numeric(df2["Amount"], errors="coerce").fillna(0)
     total = df2["Amount"].sum()
     cat_sum = df2.groupby("Category")["Amount"].sum().to_dict()
     if model:
         try:
-            prompt = f"You are FinGuard AI. Analysis: {cat_sum}, total ₹{total}. Q: {q}. Answer in mixed English-Bangla, <2 lines."
+            prompt = f"You are FinGuard AI. Analysis: {cat_sum}, total ₹{total}. Q: {q}. Answer in mixed English-Bangla, under 2 lines."
             return model.generate_content(prompt).text
         except Exception as e:
             return f"AI error: {e}"
-    # fallback
     if cat_sum:
         top = max(cat_sum, key=cat_sum.get)
-        return f"Offline Mode: highest spend was on **{top}**. Try reduce next month."
+        return f"🤖 Offline Mode: Highest spend on **{top}**. Try to reduce next month 💰"
     return "No categories yet."
 
 # ========== FRAUD DETECTION ==========
 def detect_fraud(desc, amt):
     keywords = ["lottery", "reward", "gift", "otp", "offer", "refund"]
-    if any(k in desc.lower() for k in keywords) or amt > 100000:
-        return True
-    return False
+    return any(k in desc.lower() for k in keywords) or amt > 100000
 
-# ========== UI TABS ==========
+# ========== TABS ==========
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📈 Dashboard", "💵 Add Expense", "🏦 Bank", "📅 Budget", "🤖 AI Assistant", "ℹ️ About"])
 
+# Dashboard
 with tab1:
     st.subheader("📊 Financial Overview")
     df = st.session_state.expenses
@@ -136,10 +132,19 @@ with tab1:
         fig_pie = px.pie(df, names="Category", values="Amount", title="Spending by Category", hole=0.3)
         st.plotly_chart(fig_pie, use_container_width=True)
 
+        # ✅ Fixed color scale
         daily = df.groupby(df["Date"].dt.date)["Amount"].sum().reset_index()
-        fig_bar = px.bar(daily, x="Date", y="Amount", title="Daily Spending Trend", color="Amount", color_continuous_scale="goldorangered")
+        fig_bar = px.bar(
+            daily,
+            x="Date",
+            y="Amount",
+            title="Daily Spending Trend",
+            color="Amount",
+            color_continuous_scale="YlOrBr"
+        )
         st.plotly_chart(fig_bar, use_container_width=True)
 
+# Add Expense
 with tab2:
     st.subheader("💵 Add Expense")
     with st.form("expense_form", clear_on_submit=True):
@@ -148,17 +153,15 @@ with tab2:
         desc = st.text_input("Description")
         amt = st.number_input("Amount ₹", min_value=0.0, format="%f")
         submitted = st.form_submit_button("✅ Add")
-        if submitted:
-            if amt <= 0:
-                st.error("Amount must be > 0")
-            else:
-                if detect_fraud(desc, amt):
-                    st.warning("🚨 Suspicious transaction detected!")
-                new = pd.DataFrame([[date, cat, desc, amt]], columns=["Date","Category","Description","Amount"])
-                st.session_state.expenses = pd.concat([st.session_state.expenses, new], ignore_index=True)
-                save_data(DATA_FILE, st.session_state.expenses)
-                st.success("Expense added successfully ✅")
+        if submitted and amt > 0:
+            if detect_fraud(desc, amt):
+                st.warning("🚨 Suspicious transaction detected!")
+            new = pd.DataFrame([[date, cat, desc, amt]], columns=["Date","Category","Description","Amount"])
+            st.session_state.expenses = pd.concat([st.session_state.expenses, new], ignore_index=True)
+            save_data(DATA_FILE, st.session_state.expenses)
+            st.success("Expense added successfully ✅")
 
+# Bank
 with tab3:
     st.subheader("🏦 Bank Management")
     bank = st.session_state.bank
@@ -184,6 +187,7 @@ with tab3:
         st.markdown("### 📜 Transaction History")
         st.dataframe(bank.sort_values("Date", ascending=False), use_container_width=True)
 
+# Budget
 with tab4:
     st.subheader("📅 Daily & Monthly Budget")
     daily = st.number_input("Set Daily Limit ₹", min_value=0.0, format="%f")
@@ -203,29 +207,31 @@ with tab4:
         spent_month = df[df["Date"].dt.date >= month_start]["Amount"].sum()
         st.info(f"🕒 Today: ₹{spent_today:,.2f} / ₹{daily:,.2f} | This Month: ₹{spent_month:,.2f} / ₹{monthly:,.2f}")
 
+# AI Assistant
 with tab5:
     st.subheader("🤖 FinGuard AI Assistant")
     q = st.text_area("Ask your question:")
     if st.button("🚀 Ask AI"):
         st.write(ai_reply(st.session_state.expenses, q))
 
+# About
 with tab6:
     st.markdown("""
     ---
     ### ℹ️ About FinGuard Ultra Pro
-    🪙 **FinGuard Ultra Pro — Presidency University Edition (v3.1)**
+    🪙 **FinGuard Ultra Pro — Presidency University Edition (v3.1)**  
     Smart, Secure, AI-powered Finance Tracker with Banking System.
 
     **✨ Features**
-    - 🔐 AES-style encrypted data storage
-    - 💰 Track expenses, bank & budget
-    - 💡 AI assistant + fraud detection
-    - 📊 Pie & bar charts
-    - 🏫 Presidency University integration
+    - 🔐 AES-secured encrypted data  
+    - 💰 Track expenses, bank & budget  
+    - 💡 AI assistant + fraud detection  
+    - 📊 Pie & bar charts visualization  
+    - 🏫 Presidency University Integration  
 
     **👨‍💻 Developer:** Zahid Hasan  
     **🎓 Institute:** Presidency University  
-    **🏆 ICT Innovation 2025 Submission**  
+    **🏆 ICT Innovation Award 2025 Submission**  
     Built with ❤️ using Python, Streamlit, and Google Gemini.
     ---
     """)
