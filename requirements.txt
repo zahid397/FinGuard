@@ -1,4 +1,5 @@
 streamlit
 pandas
-google-generativeai
 cryptography
+google-generativeai
+plotly
