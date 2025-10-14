@@ -70,6 +70,34 @@ if "splash_done" not in st.session_state:
     time.sleep(3)
     st.session_state["splash_done"] = True
     st.rerun()
+    st.markdown("""
+<style>
+.stApp {
+    background-color: #FFFFFF;  /* Pure white background */
+}
+
+[data-testid="stSidebar"] {
+    background-color: #FAFAFA;  /* Light sidebar for harmony */
+}
+
+h1, h2, h3, label, p, span, div, button, input, textarea {
+    color: #111111 !important;   /* Deep black text */
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #111111 !important;   /* Dark tab labels */
+    font-weight: 600;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: #000000 !important;
+}
+
+.stTabs [aria-selected="true"] {
+    border-bottom: 3px solid #FFD700 !important; /* Gold underline for active tab */
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ============================
 # 🎨 CUSTOM UI STYLE
