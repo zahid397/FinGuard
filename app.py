@@ -99,6 +99,82 @@ h1, h2, h3, label, p, span, div, button, input, textarea {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+/* ----------- BASE BACKGROUND ----------- */
+.stApp {
+    background-color: #FFFFFF !important; /* Pure white background */
+}
+
+/* ----------- SIDEBAR ----------- */
+[data-testid="stSidebar"] {
+    background-color: #FAFAFA !important; /* Light sidebar */
+}
+
+/* ----------- GLOBAL TEXT COLOR ----------- */
+html, body, [class*="st-"], p, span, div, label, h1, h2, h3, h4, h5, h6 {
+    color: #1E1E1E !important; /* Deep neutral black */
+    font-weight: 500;
+}
+
+/* ----------- TAB LABELS ----------- */
+.stTabs [data-baseweb="tab"] {
+    color: #1E1E1E !important;
+    font-weight: 600;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #000000 !important;
+}
+.stTabs [aria-selected="true"] {
+    border-bottom: 3px solid #FFD700 !important; /* Gold underline for active tab */
+}
+
+/* ----------- METRICS ----------- */
+.stMetric {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    color: #111111 !important;
+}
+
+/* ----------- BUTTONS ----------- */
+.stButton>button {
+    background-color: #FFFFFF !important;
+    color: #1E3A8A !important;
+    border: 1px solid #E0E0E0 !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease-in-out;
+}
+.stButton>button:hover {
+    background-color: #F9FAFB !important;
+    transform: scale(1.03);
+}
+
+/* ----------- CHART & CARD BG ----------- */
+.block-container {
+    background-color: #FFFFFF !important;
+}
+
+/* ----------- TITLE ----------- */
+h1.title {
+    text-align: center;
+    font-size: 2.8em;
+    font-weight: 700;
+    color: #1E3A8A !important; /* Deep Blue Title */
+}
+
+p.subtext {
+    text-align: center;
+    color: #4B5563 !important;
+    margin-bottom: 30px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+/* Final visibility override */
+html, body, [class*="st-"], p, span, div, label, h1, h2, h3, h4, h5, h6 {
+    color: #111111 !important;
+}
 # ============================
 # 🎨 CUSTOM UI STYLE
 # ============================
@@ -123,6 +199,78 @@ st.markdown("""
         font-weight: 700; color: #1E3A8A;
     }
     p.subtext { text-align: center; color: #4B5563; margin-bottom: 30px; }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+/* ----------- BASE BACKGROUND ----------- */
+.stApp {
+    background-color: #FFFFFF !important; /* Pure white background */
+}
+
+/* ----------- SIDEBAR ----------- */
+[data-testid="stSidebar"] {
+    background-color: #FAFAFA !important; /* Light sidebar */
+}
+
+/* ----------- GLOBAL TEXT COLOR ----------- */
+html, body, [class*="st-"], p, span, div, label, h1, h2, h3, h4, h5, h6 {
+    color: #1E1E1E !important; /* Deep neutral black */
+    font-weight: 500;
+}
+
+/* ----------- TAB LABELS ----------- */
+.stTabs [data-baseweb="tab"] {
+    color: #1E1E1E !important;
+    font-weight: 600;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #000000 !important;
+}
+.stTabs [aria-selected="true"] {
+    border-bottom: 3px solid #FFD700 !important; /* Gold underline for active tab */
+}
+
+/* ----------- METRICS ----------- */
+.stMetric {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    color: #111111 !important;
+}
+
+/* ----------- BUTTONS ----------- */
+.stButton>button {
+    background-color: #FFFFFF !important;
+    color: #1E3A8A !important;
+    border: 1px solid #E0E0E0 !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease-in-out;
+}
+.stButton>button:hover {
+    background-color: #F9FAFB !important;
+    transform: scale(1.03);
+}
+
+/* ----------- CHART & CARD BG ----------- */
+.block-container {
+    background-color: #FFFFFF !important;
+}
+
+/* ----------- TITLE ----------- */
+h1.title {
+    text-align: center;
+    font-size: 2.8em;
+    font-weight: 700;
+    color: #1E3A8A !important; /* Deep Blue Title */
+}
+
+p.subtext {
+    text-align: center;
+    color: #4B5563 !important;
+    margin-bottom: 30px;
+}
 </style>
 """, unsafe_allow_html=True)
 
