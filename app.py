@@ -122,10 +122,18 @@ with tab1:
     if df.empty:
         st.info("Add some expense data first.")
     else:
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
         total = df["Amount"].sum()
         st.metric("💰 Total Spent", f"₹{total:,.2f}")
-        fig = px.pie(df, names="Category", values="Amount", title="Spending by Category", hole=0.3)
-        st.plotly_chart(fig, use_container_width=True)
+
+        # Pie Chart
+        fig_pie = px.pie(df, names="Category", values="Amount", title="Spending by Category", hole=0.3)
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+        # Bar Chart
+        daily = df.groupby(df["Date"].dt.date)["Amount"].sum().reset_index()
+        fig_bar = px.bar(daily, x="Date", y="Amount", title="Daily Spending Trend", color="Amount", color_continuous_scale="goldorangered")
+        st.plotly_chart(fig_bar, use_container_width=True)
 
 # ========== ADD EXPENSE ==========
 with tab2:
@@ -179,10 +187,16 @@ with tab4:
         st.session_state.budget = new
         save_data(BUDGET_FILE, new)
         st.success("Budget updated ✅")
+
+    # Show comparison
     if not st.session_state.expenses.empty:
-        today_spent = st.session_state.expenses.query("Date == @datetime.date.today()")["Amount"].sum()
-        month_spent = st.session_state.expenses.query("Date >= @datetime.date.today().replace(day=1)")["Amount"].sum()
-        st.info(f"🕒 Today: ₹{today_spent:,.2f} / {daily} | This Month: ₹{month_spent:,.2f} / {monthly}")
+        df = st.session_state.expenses.copy()
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        today = datetime.date.today()
+        month_start = today.replace(day=1)
+        today_spent = df[df["Date"].dt.date == today]["Amount"].sum()
+        month_spent = df[df["Date"].dt.date >= month_start]["Amount"].sum()
+        st.info(f"🕒 Today: ₹{today_spent:,.2f} / ₹{daily:,.2f} | This Month: ₹{month_spent:,.2f} / ₹{monthly:,.2f}")
 
 # ========== AI ASSISTANT ==========
 with tab5:
@@ -196,13 +210,14 @@ with tab6:
     st.markdown("""
     ---
     ### ℹ️ About FinGuard Ultra Pro
-    🪙 **FinGuard Ultra Pro — Presidency University Edition (v3.0)**
+    🪙 **FinGuard Ultra Pro — Presidency University Edition (v3.1)**
     Smart, Secure, AI-powered Finance Tracker with Banking System.
 
     **✨ Features**
     - 🔐 AES-secured encrypted data  
-    - 🧮 Bank, Budget & Expense Tracking  
+    - 💰 Bank, Budget & Expense Tracking  
     - 💡 AI + Fraud Detection  
+    - 📈 Pie & Bar Charts for visualization  
     - 🏫 Presidency University Collaboration  
 
     **👨‍💻 Developer:** Zahid Hasan  
