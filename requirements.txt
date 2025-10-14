@@ -1,5 +1,5 @@
-streamlit==1.39.0
-pandas==2.2.2
-plotly==5.24.1
-cryptography==43.0.1
-google-generativeai==0.5.4
+streamlit
+pandas
+plotly
+cryptography
+google-generativeai
