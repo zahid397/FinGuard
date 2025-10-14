@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # ============================
-# 🎨 WHITE + GOLD UI + LOGO
+# 🎨 WHITE + GOLD UI (READABLE)
 # ============================
 st.markdown("""
 <style>
@@ -26,57 +26,60 @@ st.markdown("""
 html, body, [class*="st-"] {
     font-family: 'Poppins', sans-serif;
     background-color: #FFFFFF !important;
+    color: #1E1E1E !important;
 }
 
 .stApp { background-color: #FFFFFF !important; }
 
 [data-testid="stSidebar"] {
     background-color: #FAFAFA !important;
+    color: #111;
 }
 
-/* Glowing gold text animation */
+/* 🌟 Gold Title Animation */
 @keyframes goldGlow {
-  0% { text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700; }
-  50% { text-shadow: 0 0 25px #FFD700, 0 0 50px #FFCC00; }
-  100% { text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700; }
+  0% { text-shadow: 0 0 3px #FFD700, 0 0 5px #FFD700; }
+  50% { text-shadow: 0 0 15px #FFD700, 0 0 25px #FFCC00; }
+  100% { text-shadow: 0 0 3px #FFD700, 0 0 5px #FFD700; }
 }
 
 /* Title */
 .title-container { text-align: center; margin-bottom: 25px; }
 .title-text {
     display: inline-block;
-    color: #B8860B;
+    color: #C28C00;
     font-size: 2.8em;
     font-weight: 700;
-    animation: goldGlow 2.5s infinite ease-in-out;
+    animation: goldGlow 3s infinite ease-in-out;
     margin-left: 10px;
     vertical-align: middle;
 }
 
+/* Logo */
 .logo-img {
     width: 85px;
     height: 85px;
     vertical-align: middle;
     animation: pulse 3s infinite ease-in-out;
 }
-
 @keyframes pulse {
-  0% { transform: scale(1); filter: drop-shadow(0 0 6px gold); }
-  50% { transform: scale(1.08); filter: drop-shadow(0 0 18px gold); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 6px gold); }
+  0% { transform: scale(1); filter: drop-shadow(0 0 3px gold); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 8px gold); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 3px gold); }
 }
 
+/* Subtext */
 p.subtext {
     text-align: center;
-    color: #333;
-    margin-bottom: 25px;
-    font-size: 1.05em;
+    color: #2F2F2F;
+    font-size: 1.1em;
+    margin-bottom: 20px;
 }
 
 /* Buttons */
 .stButton>button {
     background-color: #FFFFFF !important;
-    color: #111111 !important;
+    color: #000 !important;
     border: 1px solid #E0E0E0 !important;
     border-radius: 10px !important;
     font-weight: 600;
@@ -90,10 +93,16 @@ p.subtext {
 /* Tabs */
 .stTabs [data-baseweb="tab"] {
     font-weight: 600;
-    color: #111 !important;
+    color: #222 !important;
 }
 .stTabs [aria-selected="true"] {
     border-bottom: 3px solid #FFD700 !important;
+    color: #000 !important;
+}
+
+/* About text fix */
+h2, h3, h4, p, li {
+    color: #1E1E1E !important;
 }
 </style>
 """, unsafe_allow_html=True)
